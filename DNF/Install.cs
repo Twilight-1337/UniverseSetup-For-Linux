@@ -74,7 +74,6 @@ static string? FindExecutable(string name)
     return null;
 }
 
-
 Console.WriteLine("===== Fedora Setup =====");
 Console.WriteLine("Packages to install:");
 Console.WriteLine("- Fastfetch");
@@ -85,7 +84,9 @@ Console.WriteLine("-  Git");
 Console.WriteLine("- C#/.NET SDK");
 Console.WriteLine("- BTop");
 Console.WriteLine("- Rust");
-
+Console.WriteLine("- OBS Studio");
+Console.WriteLine("- Steam");
+Console.WriteLine("- Gear Lever (FlatPak)");
 
 Console.WriteLine();
 Console.Write("Do you want to continue? (yes/no): ");
@@ -110,6 +111,9 @@ if (answer.Trim().Equals("yes", StringComparison.OrdinalIgnoreCase))
     process.StartInfo.ArgumentList.Add("btop");
     process.StartInfo.ArgumentList.Add("rustup");
     process.StartInfo.ArgumentList.Add("dotnet-sdk-10.0");
+    process.StartInfo.ArgumentList.Add("obs-studio");
+    process.StartInfo.ArgumentList.Add("steam");
+    process.StartInfo.ArgumentList.Add("flatpak");
 
     Console.WriteLine("Requesting Super User Permisions");
 
@@ -128,6 +132,54 @@ if (answer.Trim().Equals("yes", StringComparison.OrdinalIgnoreCase))
     if (process.ExitCode == 0)
     {
         Console.WriteLine("Installation completed successfully!");
+
+        Console.WriteLine();
+        Console.WriteLine("Adding Flathub repository...");
+
+        Process flatpakRepo = new Process();
+
+        flatpakRepo.StartInfo.FileName = "pkexec";
+        flatpakRepo.StartInfo.ArgumentList.Add("flatpak");
+        flatpakRepo.StartInfo.ArgumentList.Add("remote-add");
+        flatpakRepo.StartInfo.ArgumentList.Add("--if-not-exists");
+        flatpakRepo.StartInfo.ArgumentList.Add("flathub");
+        flatpakRepo.StartInfo.ArgumentList.Add("https://flathub.org/repo/flathub.flatpakrepo");
+
+        flatpakRepo.Start();
+        flatpakRepo.WaitForExit();
+
+        if (flatpakRepo.ExitCode == 0)
+        {
+            Console.WriteLine("Installing Gear Lever...");
+
+            Process gearlever = new Process();
+
+            gearlever.StartInfo.FileName = "pkexec";
+            gearlever.StartInfo.ArgumentList.Add("flatpak");
+            gearlever.StartInfo.ArgumentList.Add("install");
+            gearlever.StartInfo.ArgumentList.Add("--system");
+            gearlever.StartInfo.ArgumentList.Add("-y");
+            gearlever.StartInfo.ArgumentList.Add("flathub");
+            gearlever.StartInfo.ArgumentList.Add("it.mijorus.gearlever");
+
+            gearlever.Start();
+            gearlever.WaitForExit();
+
+            if (gearlever.ExitCode == 0)
+            {
+                Console.WriteLine("Gear Lever installed successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Gear Lever installation failed!");
+                Console.WriteLine("Exit code: " + gearlever.ExitCode);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Failed to add Flathub repository!");
+            Console.WriteLine("Exit code: " + flatpakRepo.ExitCode);
+        }
     }
     else
     {
