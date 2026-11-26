@@ -15,10 +15,11 @@ if (!Environment.GetCommandLineArgs().Contains("--terminal"))
     }
 
     var terminals = new (string Name, string Argument)[]
-    {
-        ("konsole", "-e"),
-        ("gnome-terminal", "--")
-    };
+{
+    ("konsole", "-e"),
+    ("ptyxis", "--"),
+    ("gnome-terminal", "--"),
+};
 
     bool launched = false;
 
