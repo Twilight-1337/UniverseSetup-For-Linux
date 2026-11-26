@@ -15,11 +15,11 @@ if (!Environment.GetCommandLineArgs().Contains("--terminal"))
     }
 
     var terminals = new (string Name, string Argument)[]
-{
-    ("konsole", "-e"),
-    ("ptyxis", "--"),
-    ("gnome-terminal", "--"),
-};
+    {
+        ("konsole", "-e"),
+        ("ptyxis", "--"),
+        ("gnome-terminal", "--"),
+    };
 
     bool launched = false;
 
@@ -84,6 +84,9 @@ Console.WriteLine("- Prism Launcher");
 Console.WriteLine("- Btop");
 Console.WriteLine("- Rustup");
 Console.WriteLine("- .NET SDK 10.0");
+Console.WriteLine("- OBS Studio");
+Console.WriteLine("- Steam (Flatpak)");
+Console.WriteLine("- Gear Lever (Flatpak)");
 
 Console.WriteLine();
 Console.Write("Do you want to continue? (yes/no): ");
@@ -158,7 +161,9 @@ apt-get install -y \
     codium \
     prismlauncher \
     btop \
-    rustup
+    rustup \
+    obs-studio \
+    flatpak
 
 echo "Installing .NET SDK 10.0..."
 
@@ -169,6 +174,17 @@ if ! apt-cache show dotnet-sdk-10.0 >/dev/null 2>&1; then
 fi
 
 apt-get install -y dotnet-sdk-10.0
+
+echo "Adding Flathub repository..."
+
+flatpak remote-add --system --if-not-exists flathub \
+    https://flathub.org/repo/flathub.flatpakrepo
+
+echo "Installing Steam and Gear Lever..."
+
+flatpak install --system -y flathub \
+    com.valvesoftware.Steam \
+    it.mijorus.gearlever
 
 echo "Installation completed successfully!"
 """);
