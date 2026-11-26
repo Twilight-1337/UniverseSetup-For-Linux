@@ -1,21 +1,76 @@
-
 using System;
 using System.Diagnostics;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 
 if (!Environment.GetCommandLineArgs().Contains("--terminal"))
 {
-    ProcessStartInfo startInfo = new ProcessStartInfo
+    string? executablePath = Environment.ProcessPath;
+
+    if (string.IsNullOrEmpty(executablePath))
     {
-        FileName = "konsole"
+        Console.WriteLine("Cannot determine executable path.");
+        return;
+    }
+
+    var terminals = new (string Name, string Argument)[]
+    {
+        ("konsole", "-e"),
+        ("gnome-terminal", "--")
     };
 
-    startInfo.ArgumentList.Add("-e");
-    startInfo.ArgumentList.Add(Environment.ProcessPath!);
-    startInfo.ArgumentList.Add("--terminal");
+    bool launched = false;
 
-    Process.Start(startInfo);
+    foreach (var terminal in terminals)
+    {
+        string? terminalPath = FindExecutable(terminal.Name);
+
+        if (terminalPath == null)
+            continue;
+
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            FileName = terminalPath
+        };
+
+        startInfo.ArgumentList.Add(terminal.Argument);
+        startInfo.ArgumentList.Add(executablePath);
+        startInfo.ArgumentList.Add("--terminal");
+
+        try
+        {
+            Process.Start(startInfo);
+            launched = true;
+            break;
+        }
+        catch (Win32Exception)
+        {
+            continue;
+        }
+    }
+
+    if (!launched)
+    {
+        Console.WriteLine("No supported terminal found!");
+    }
+
     return;
+}
+
+static string? FindExecutable(string name)
+{
+    string pathVariable = Environment.GetEnvironmentVariable("PATH") ?? "";
+
+    foreach (string directory in pathVariable.Split(Path.PathSeparator))
+    {
+        string path = Path.Combine(directory, name);
+
+        if (File.Exists(path))
+            return path;
+    }
+
+    return null;
 }
 
 Console.WriteLine("===== UniverseSetup for Linux =====");
